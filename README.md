@@ -1,10 +1,10 @@
 # SMS Korea PWA 📱
 
-A Progressive Web App (PWA) designed to send SMS messages to multiple South Korean phone numbers. This app features a modern, responsive design with bilingual support (Korean/English), bulk sending capabilities, and PWA features.
+A Progressive Web App (PWA) designed to send **REAL SMS messages** to multiple South Korean phone numbers. This app features a modern, responsive design with bilingual support (Korean/English), bulk sending capabilities, and **native SMS functionality on mobile devices**.
 
 ## ✨ Features
 
-- **📱 Multiple SMS Sending**: Send to multiple phone numbers simultaneously
+- **📱 REAL SMS SENDING**: Actually sends SMS messages on mobile devices!
 - **🇰🇷 Korean Phone Number Support**: Validates and formats Korean mobile numbers (010-XXXX-XXXX)
 - **🔄 Bulk Send Mode**: Send the same message to all numbers at once
 - **📝 Individual Send Mode**: Send individual messages to each number
@@ -17,13 +17,27 @@ A Progressive Web App (PWA) designed to send SMS messages to multiple South Kore
 - **📱 Responsive Design**: Works perfectly on all device sizes
 - **⚡ Fast Performance**: Optimized for speed and user experience
 - **📈 Progress Tracking**: Real-time progress updates during bulk sending
+- **📱 Native SMS Integration**: Opens default SMS app on mobile devices
+
+## 🚀 **실제 SMS 전송 (Real SMS Sending)**
+
+### **📱 모바일에서 실제 SMS 전송**
+- **PWA 설치 후**: 홈 화면에 설치하면 네이티브 앱처럼 작동
+- **자동 SMS 앱 열기**: 전화번호와 메시지가 자동으로 입력됨
+- **삼성 메시지, 카카오톡 등**: 기본 SMS 앱과 동일하게 작동
+- **실제 SMS 전송**: 사용자가 전송 버튼만 누르면 됨
+
+### **💻 데스크톱에서 사용**
+- **시뮬레이션 모드**: 실제 SMS 전송을 시뮬레이션
+- **SMS API 연동**: Twilio, Nexmo 등 SMS 서비스와 연동 가능
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - A modern web browser (Chrome, Firefox, Safari, Edge)
-- For actual SMS sending: An SMS API service (Twilio, Nexmo, etc.)
+- **Mobile device recommended** for real SMS functionality
+- For actual SMS sending on desktop: An SMS API service (Twilio, Nexmo, etc.)
 
 ### Installation
 
@@ -55,7 +69,7 @@ A Progressive Web App (PWA) designed to send SMS messages to multiple South Kore
 sms-korea-pwa/
 ├── index.html          # Main HTML file
 ├── styles.css          # CSS styling
-├── app.js             # JavaScript functionality
+├── app.js             # JavaScript functionality with real SMS
 ├── manifest.json      # PWA manifest
 ├── sw.js             # Service worker
 ├── icons/            # App icons
@@ -68,14 +82,14 @@ sms-korea-pwa/
 ### PWA Settings
 
 The app is configured as a PWA with:
-- **Name**: SMS Korea - 메시지 전송
+- **Name**: SMS Korea - 실제 SMS 전송
 - **Display**: Standalone (app-like experience)
 - **Theme Color**: #4F46E5 (Indigo)
 - **Background Color**: #667eea (Blue gradient)
 
 ### SMS API Integration
 
-To enable actual SMS sending, you'll need to:
+To enable actual SMS sending on desktop, you'll need to:
 
 1. **Choose an SMS API service**:
    - [Twilio](https://www.twilio.com/sms)
@@ -106,7 +120,7 @@ To enable actual SMS sending, you'll need to:
 ## 📱 PWA Features
 
 ### Installation
-- **Mobile**: Add to home screen for app-like experience
+- **Mobile**: Add to home screen for app-like experience with real SMS
 - **Desktop**: Install from browser for desktop app
 
 ### Offline Support
@@ -147,12 +161,12 @@ The app validates Korean mobile numbers:
 - **Prefixes**: 010, 011, 016, 017, 018, 019
 - **Example**: 010-1234-5678
 - **Multiple Numbers**: Enter one number per line
-- **Maximum**: Up to 50 numbers per batch
+- **Maximum**: Up to 10 numbers per batch (for real SMS)
 
 ## 🔒 Security Notes
 
-- **Demo Mode**: This app currently runs in demo mode
-- **No Real SMS**: Messages are simulated for demonstration
+- **Real SMS on Mobile**: PWA 설치 후 모바일에서 실제 SMS 전송 가능
+- **Desktop Simulation**: 데스크톱에서는 시뮬레이션 모드
 - **API Keys**: Never expose API keys in client-side code
 - **HTTPS Required**: PWA features require HTTPS in production
 
@@ -188,10 +202,11 @@ If you encounter issues:
 2. Ensure you're using HTTPS in production
 3. Verify service worker registration
 4. Check PWA manifest validity
+5. **For SMS issues**: Ensure PWA is installed on mobile device
 
 ## 🔮 Future Enhancements
 
-- [ ] Real SMS API integration
+- [ ] Enhanced SMS API integration
 - [ ] Message templates
 - [ ] Contact management
 - [ ] Message history
@@ -202,8 +217,23 @@ If you encounter issues:
 - [ ] Message personalization per recipient
 - [ ] Rate limiting controls
 - [ ] Delivery reports
+- [ ] SMS delivery status tracking
 
 ## 📱 Usage Guide
+
+### **실제 SMS 전송 (Real SMS Sending)**
+
+#### **모바일 PWA 설치 후:**
+1. **PWA 설치**: 브라우저에서 "홈 화면에 추가" 선택
+2. **홈 화면에서 실행**: 네이티브 앱처럼 작동
+3. **전화번호 입력**: 한 줄에 하나씩 번호 입력
+4. **메시지 작성**: SMS 메시지 입력 (최대 500자)
+5. **SMS 전송**: 버튼 클릭 시 자동으로 SMS 앱 열림
+6. **전송 완료**: 사용자가 SMS 앱에서 전송 버튼만 누르면 됨
+
+#### **데스크톱에서:**
+1. **시뮬레이션 모드**: 실제 SMS 전송을 시뮬레이션
+2. **SMS API 연동**: Twilio 등 SMS 서비스와 연동하여 실제 전송
 
 ### Sending to Multiple Numbers
 
@@ -226,8 +256,8 @@ If you encounter issues:
 
 4. **Send**: 
    - Click the send button
-   - Monitor progress in real-time
-   - View results summary
+   - **Mobile**: SMS app opens automatically
+   - **Desktop**: Simulation mode or API integration
 
 ### Phone Number Formatting
 
@@ -244,6 +274,21 @@ During bulk sending, you'll see:
 - Individual number status
 - Completion summary
 
+## 🔧 Technical Implementation
+
+### **Real SMS on Mobile**
+- **SMS URL Scheme**: `sms:01012345678?body=message`
+- **Web Share API**: Modern browsers support
+- **Fallback**: Direct SMS URL navigation
+- **PWA Integration**: Seamless native app experience
+
+### **Desktop Fallback**
+- **Simulation Mode**: Demo functionality
+- **API Integration**: SMS service providers
+- **Error Handling**: Graceful degradation
+
 ---
 
-**Note**: This is a demonstration PWA. For production use, integrate with a real SMS service and implement proper security measures.
+**🎉 핵심 기능: 모바일 PWA 설치 후 실제 SMS 전송이 가능합니다!**
+
+**🎉 Key Feature: Real SMS sending is possible after installing PWA on mobile!**

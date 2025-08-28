@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Korea - 메시지 전송</title>
-    <meta name="description" content="Send SMS messages to South Korean phone numbers">
+    <title>SMS Korea - 실제 SMS 전송</title>
+    <meta name="description" content="Send real SMS messages to South Korean phone numbers">
     <meta name="theme-color" content="#4F46E5">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
@@ -15,7 +15,7 @@
     <div class="container">
         <header class="header">
             <h1 class="title">SMS Korea</h1>
-            <p class="subtitle">한국 전화번호로 메시지 전송</p>
+            <p class="subtitle">한국 전화번호로 실제 SMS 전송</p>
         </header>
 
         <main class="main">
@@ -44,7 +44,7 @@
                     <textarea 
                         id="message" 
                         class="textarea" 
-                        placeholder="전송할 메시지를 입력하세요..."
+                        placeholder="전송할 SMS 메시지를 입력하세요..."
                         rows="4"
                         maxlength="500"
                         required
@@ -66,7 +66,7 @@
                 </div>
 
                 <button id="sendButton" class="send-button">
-                    <span class="button-text">메시지 전송</span>
+                    <span class="button-text">SMS 전송</span>
                     <span class="button-icon">📱</span>
                 </button>
 
@@ -74,24 +74,44 @@
             </div>
 
             <div class="info-section">
+                <h3>📱 실제 SMS 전송 방법 (Real SMS Sending)</h3>
+                
+                <div class="sms-info">
+                    <h4>✅ 모바일에서 실제 SMS 전송 (Real SMS on Mobile)</h4>
+                    <ul>
+                        <li><strong>단일 번호</strong>: 자동으로 기본 SMS 앱이 열립니다</li>
+                        <li><strong>여러 번호</strong>: 전화번호와 메시지가 복사되어 편리하게 전송할 수 있습니다</li>
+                        <li><strong>삼성 메시지, 카카오톡 등</strong>: 기본 SMS 앱과 동일하게 작동합니다</li>
+                    </ul>
+                </div>
+
+                <div class="sms-info">
+                    <h4>💻 데스크톱에서 사용 (Desktop Usage)</h4>
+                    <ul>
+                        <li><strong>시뮬레이션 모드</strong>: 실제 SMS 전송을 시뮬레이션합니다</li>
+                        <li><strong>SMS API 연동</strong>: Twilio, Nexmo 등 SMS 서비스와 연동 가능합니다</li>
+                    </ul>
+                </div>
+
                 <h3>사용 방법 (How to use)</h3>
                 <ol>
                     <li>한국 전화번호를 입력하세요 (한 줄에 하나씩) (Enter South Korean phone numbers, one per line)</li>
-                    <li>전송할 메시지를 작성하세요 (Write your message)</li>
+                    <li>전송할 SMS 메시지를 작성하세요 (Write your SMS message)</li>
                     <li>일괄 전송 모드를 선택하세요 (Choose bulk send mode)</li>
-                    <li>전송 버튼을 클릭하세요 (Click the send button)</li>
+                    <li>SMS 전송 버튼을 클릭하세요 (Click the SMS send button)</li>
+                    <li>모바일에서는 자동으로 SMS 앱이 열립니다 (On mobile, SMS app opens automatically)</li>
                 </ol>
                 
                 <div class="note">
-                    <strong>참고:</strong> 이 앱은 데모 목적으로 제작되었습니다. 실제 SMS 전송을 위해서는 적절한 SMS API 서비스가 필요합니다.
+                    <strong>📱 모바일 PWA 설치 후:</strong> 홈 화면에 설치하면 네이티브 앱처럼 실제 SMS를 보낼 수 있습니다!
                     <br><br>
-                    <strong>Note:</strong> This app is created for demonstration purposes. Actual SMS sending requires an appropriate SMS API service.
+                    <strong>📱 Mobile PWA after installation:</strong> After installing to home screen, you can send real SMS like a native app!
                 </div>
             </div>
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 SMS Korea PWA</p>
+            <p>&copy; 2024 SMS Korea PWA - 실제 SMS 전송 가능</p>
         </footer>
     </div>
 

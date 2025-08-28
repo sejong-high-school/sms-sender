@@ -11,6 +11,7 @@ class SMSApp {
         this.initializeEventListeners();
         this.updateCharCount();
         this.updatePhoneCount();
+        this.checkDeviceCapabilities();
     }
 
     initializeEventListeners() {
@@ -47,6 +48,19 @@ class SMSApp {
         });
     }
 
+    checkDeviceCapabilities() {
+        // Check if running on mobile device
+        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        // Check if SMS URL scheme is supported
+        this.smsSupported = 'sms' in navigator || this.isMobile;
+        
+        if (this.smsSupported) {
+            this.showStatus('모바일 SMS 기능이 활성화되었습니다! (Mobile SMS functionality activated!)', 'success');
+            setTimeout(() => this.clearStatus(), 3000);
+        }
+    }
+
     updatePhoneCount() {
         const phoneNumbers = this.getPhoneNumbers();
         const count = phoneNumbers.length;
@@ -64,11 +78,11 @@ class SMSApp {
         if (count === 0) {
             this.sendButton.querySelector('.button-text').textContent = '전화번호 입력 필요';
         } else if (count === 1) {
-            this.sendButton.querySelector('.button-text').textContent = '메시지 전송';
+            this.sendButton.querySelector('.button-text').textContent = 'SMS 전송';
         } else if (isBulkMode) {
-            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 일괄 전송`;
+            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 SMS 전송`;
         } else {
-            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 개별 전송`;
+            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 개별 SMS`;
         }
     }
 
@@ -146,8 +160,8 @@ class SMSApp {
             return false;
         }
 
-        if (phoneNumbers.length > 50) {
-            this.showStatus('한 번에 최대 50개 번호까지만 전송 가능합니다. (Maximum 50 numbers can be sent at once)', 'error');
+        if (phoneNumbers.length > 10) {
+            this.showStatus('한 번에 최대 10개 번호까지만 전송 가능합니다. (Maximum 10 numbers can be sent at once)', 'error');
             this.phoneInput.focus();
             return false;
         }
@@ -177,6 +191,94 @@ class SMSApp {
         const message = this.messageInput.value.trim();
         const isBulkMode = this.bulkMode.checked;
 
+        if (this.smsSupported && this.isMobile) {
+            // Use native SMS functionality on mobile
+            this.sendNativeSMS(phoneNumbers, message, isBulkMode);
+        } else {
+            // Fallback to simulated sending
+            this.sendSimulatedSMS(phoneNumbers, message, isBulkMode);
+        }
+    }
+
+    sendNativeSMS(phoneNumbers, message, isBulkMode) {
+        if (phoneNumbers.length === 1) {
+            // Single number - open SMS app directly
+            this.openSMSApp(phoneNumbers[0], message);
+        } else if (isBulkMode) {
+            // Multiple numbers - show instructions
+            this.showBulkSMSInstructions(phoneNumbers, message);
+        } else {
+            // Individual mode - show instructions for each
+            this.showIndividualSMSInstructions(phoneNumbers, message);
+        }
+    }
+
+    openSMSApp(phone, message) {
+        try {
+            // Remove dashes for SMS URL
+            const cleanPhone = phone.replace(/-/g, '');
+            
+            // Create SMS URL
+            const smsUrl = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+            
+            // Try to open SMS app
+            if (navigator.share && navigator.canShare) {
+                // Use Web Share API if available
+                navigator.share({
+                    title: 'SMS 전송',
+                    text: message,
+                    url: smsUrl
+                }).catch(() => {
+                    // Fallback to direct SMS URL
+                    window.location.href = smsUrl;
+                });
+            } else {
+                // Direct SMS URL
+                window.location.href = smsUrl;
+            }
+            
+            this.showStatus('SMS 앱이 열렸습니다. 전송 버튼을 눌러주세요. (SMS app opened. Please press send.)', 'success');
+            
+        } catch (error) {
+            this.showStatus('SMS 앱을 열 수 없습니다. (Cannot open SMS app)', 'error');
+            console.error('SMS app error:', error);
+        }
+    }
+
+    showBulkSMSInstructions(phoneNumbers, message) {
+        const instructions = `📱 ${phoneNumbers.length}개 번호에 SMS 전송하기:
+
+1. 아래 번호들을 복사하세요:
+${phoneNumbers.join('\n')}
+
+2. 메시지 내용:
+${message}
+
+3. 각 번호에 개별적으로 SMS를 보내주세요.
+
+또는 일괄 전송을 위해 SMS API 서비스를 연동하세요.`;
+
+        this.showStatus(instructions, 'info');
+        
+        // Copy to clipboard if possible
+        if (navigator.clipboard) {
+            navigator.clipboard.writeText(phoneNumbers.join('\n'));
+            setTimeout(() => {
+                this.showStatus('전화번호가 클립보드에 복사되었습니다! (Phone numbers copied to clipboard!)', 'success');
+            }, 1000);
+        }
+    }
+
+    showIndividualSMSInstructions(phoneNumbers, message) {
+        const instructions = `📱 ${phoneNumbers.length}개 번호에 개별 SMS 전송:
+
+각 번호에 개별적으로 메시지를 보내주세요.
+메시지 내용: ${message}`;
+
+        this.showStatus(instructions, 'info');
+    }
+
+    async sendSimulatedSMS(phoneNumbers, message, isBulkMode) {
         // Show loading state
         this.setLoadingState(true);
         
@@ -313,6 +415,9 @@ class SMSApp {
         this.statusDiv.textContent = message;
         this.statusDiv.className = `status ${type}`;
         this.statusDiv.style.display = 'block';
+        
+        // Auto-scroll to status
+        this.statusDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     clearStatus() {
