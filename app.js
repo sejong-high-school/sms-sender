@@ -1,19 +1,22 @@
 class SMSApp {
     constructor() {
-        this.phoneInput = document.getElementById('phoneNumber');
+        this.phoneInput = document.getElementById('phoneNumbers');
         this.messageInput = document.getElementById('message');
         this.sendButton = document.getElementById('sendButton');
         this.statusDiv = document.getElementById('status');
         this.charCount = document.getElementById('charCount');
+        this.phoneCount = document.getElementById('phoneCount');
+        this.bulkMode = document.getElementById('bulkMode');
         
         this.initializeEventListeners();
         this.updateCharCount();
+        this.updatePhoneCount();
     }
 
     initializeEventListeners() {
-        // Phone number formatting
-        this.phoneInput.addEventListener('input', (e) => {
-            this.formatPhoneNumber(e.target);
+        // Phone numbers formatting and counting
+        this.phoneInput.addEventListener('input', () => {
+            this.updatePhoneCount();
         });
 
         // Character count update
@@ -37,10 +40,52 @@ class SMSApp {
         this.messageInput.addEventListener('input', () => {
             this.autoResizeTextarea();
         });
+
+        // Bulk mode toggle
+        this.bulkMode.addEventListener('change', () => {
+            this.updateSendButtonText();
+        });
+    }
+
+    updatePhoneCount() {
+        const phoneNumbers = this.getPhoneNumbers();
+        const count = phoneNumbers.length;
+        this.phoneCount.textContent = count;
+        
+        // Update button text based on count
+        this.updateSendButtonText();
+    }
+
+    updateSendButtonText() {
+        const phoneNumbers = this.getPhoneNumbers();
+        const count = phoneNumbers.length;
+        const isBulkMode = this.bulkMode.checked;
+        
+        if (count === 0) {
+            this.sendButton.querySelector('.button-text').textContent = '전화번호 입력 필요';
+        } else if (count === 1) {
+            this.sendButton.querySelector('.button-text').textContent = '메시지 전송';
+        } else if (isBulkMode) {
+            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 일괄 전송`;
+        } else {
+            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 개별 전송`;
+        }
+    }
+
+    getPhoneNumbers() {
+        const input = this.phoneInput.value.trim();
+        if (!input) return [];
+        
+        return input
+            .split('\n')
+            .map(line => line.trim())
+            .filter(line => line.length > 0)
+            .map(phone => this.formatPhoneNumber(phone))
+            .filter(phone => this.isValidKoreanPhoneNumber(phone));
     }
 
     formatPhoneNumber(input) {
-        let value = input.value.replace(/\D/g, '');
+        let value = input.replace(/\D/g, '');
         
         if (value.length >= 3) {
             value = value.slice(0, 3) + '-' + value.slice(3);
@@ -52,7 +97,21 @@ class SMSApp {
             value = value.slice(0, 13);
         }
         
-        input.value = value;
+        return value;
+    }
+
+    isValidKoreanPhoneNumber(phone) {
+        // Korean mobile numbers start with 010, 011, 016, 017, 018, 019
+        const koreanMobilePatterns = [
+            /^010-\d{4}-\d{4}$/,  // 010-XXXX-XXXX (most common)
+            /^011-\d{3}-\d{4}$/,  // 011-XXX-XXXX
+            /^016-\d{3}-\d{4}$/,  // 016-XXX-XXXX
+            /^017-\d{3}-\d{4}$/,  // 017-XXX-XXXX
+            /^018-\d{3}-\d{4}$/,  // 018-XXX-XXXX
+            /^019-\d{3}-\d{4}$/   // 019-XXX-XXXX
+        ];
+        
+        return koreanMobilePatterns.some(pattern => pattern.test(phone));
     }
 
     updateCharCount() {
@@ -74,22 +133,21 @@ class SMSApp {
     }
 
     validateForm() {
-        const phone = this.phoneInput.value.trim();
+        const phoneNumbers = this.getPhoneNumbers();
         const message = this.messageInput.value.trim();
 
         // Clear previous status
         this.clearStatus();
 
-        // Validate phone number
-        if (!phone) {
-            this.showStatus('전화번호를 입력해주세요. (Please enter a phone number)', 'error');
+        // Validate phone numbers
+        if (phoneNumbers.length === 0) {
+            this.showStatus('하나 이상의 유효한 전화번호를 입력해주세요. (Please enter at least one valid phone number)', 'error');
             this.phoneInput.focus();
             return false;
         }
 
-        const phonePattern = /^010-\d{4}-\d{4}$/;
-        if (!phonePattern.test(phone)) {
-            this.showStatus('올바른 한국 전화번호 형식을 입력해주세요. (Please enter a valid Korean phone number format)', 'error');
+        if (phoneNumbers.length > 50) {
+            this.showStatus('한 번에 최대 50개 번호까지만 전송 가능합니다. (Maximum 50 numbers can be sent at once)', 'error');
             this.phoneInput.focus();
             return false;
         }
@@ -115,19 +173,30 @@ class SMSApp {
             return;
         }
 
-        const phone = this.phoneInput.value.trim();
+        const phoneNumbers = this.getPhoneNumbers();
         const message = this.messageInput.value.trim();
+        const isBulkMode = this.bulkMode.checked;
 
         // Show loading state
         this.setLoadingState(true);
-        this.showStatus('메시지를 전송 중입니다... (Sending message...)', 'loading');
+        
+        if (isBulkMode) {
+            this.showStatus(`${phoneNumbers.length}개 번호에 메시지를 전송 중입니다... (Sending message to ${phoneNumbers.length} numbers...)`, 'loading');
+        } else {
+            this.showStatus(`${phoneNumbers.length}개 번호에 개별 메시지를 전송 중입니다... (Sending individual messages to ${phoneNumbers.length} numbers...)`, 'loading');
+        }
 
         try {
-            // Simulate API call delay
-            await this.simulateAPICall(phone, message);
+            let results;
             
-            // Show success
-            this.showStatus('메시지가 성공적으로 전송되었습니다! (Message sent successfully!)', 'success');
+            if (isBulkMode) {
+                results = await this.sendBulkSMS(phoneNumbers, message);
+            } else {
+                results = await this.sendIndividualSMS(phoneNumbers, message);
+            }
+            
+            // Show success with results
+            this.showResults(results);
             
             // Clear form
             this.clearForm();
@@ -141,6 +210,82 @@ class SMSApp {
         }
     }
 
+    async sendBulkSMS(phoneNumbers, message) {
+        // Simulate bulk SMS sending
+        const results = {
+            total: phoneNumbers.length,
+            successful: 0,
+            failed: 0,
+            details: []
+        };
+
+        for (let i = 0; i < phoneNumbers.length; i++) {
+            const phone = phoneNumbers[i];
+            try {
+                await this.simulateAPICall(phone, message);
+                results.successful++;
+                results.details.push({ phone, status: 'success' });
+            } catch (error) {
+                results.failed++;
+                results.details.push({ phone, status: 'failed', error: error.message });
+            }
+            
+            // Update progress
+            if (i % 5 === 0 || i === phoneNumbers.length - 1) {
+                this.showStatus(`진행률: ${i + 1}/${phoneNumbers.length} (${Math.round((i + 1) / phoneNumbers.length * 100)}%)`, 'info');
+            }
+            
+            // Small delay between sends to avoid rate limiting
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        return results;
+    }
+
+    async sendIndividualSMS(phoneNumbers, message) {
+        // Simulate individual SMS sending (could be different messages per number)
+        const results = {
+            total: phoneNumbers.length,
+            successful: 0,
+            failed: 0,
+            details: []
+        };
+
+        for (let i = 0; i < phoneNumbers.length; i++) {
+            const phone = phoneNumbers[i];
+            try {
+                await this.simulateAPICall(phone, message);
+                results.successful++;
+                results.details.push({ phone, status: 'success' });
+            } catch (error) {
+                results.failed++;
+                results.details.push({ phone, status: 'failed', error: error.message });
+            }
+            
+            // Update progress
+            if (i % 5 === 0 || i === phoneNumbers.length - 1) {
+                this.showStatus(`진행률: ${i + 1}/${phoneNumbers.length} (${Math.round((i + 1) / phoneNumbers.length * 100)}%)`, 'info');
+            }
+            
+            // Small delay between sends
+            await new Promise(resolve => setTimeout(resolve, 200));
+        }
+
+        return results;
+    }
+
+    showResults(results) {
+        const { total, successful, failed } = results;
+        
+        if (failed === 0) {
+            this.showStatus(`성공! ${total}개 번호에 모두 전송되었습니다! (Success! Sent to all ${total} numbers!)`, 'success');
+        } else if (successful === 0) {
+            this.showStatus(`실패! 모든 번호에 전송 실패했습니다. (Failed! Failed to send to all numbers.)`, 'error');
+        } else {
+            this.showStatus(`부분 성공: ${successful}개 성공, ${failed}개 실패 (Partial success: ${successful} successful, ${failed} failed)`, 'info');
+        }
+    }
+
     async simulateAPICall(phone, message) {
         // This is a simulation - in a real app, you would integrate with an SMS API service
         return new Promise((resolve, reject) => {
@@ -151,7 +296,7 @@ class SMSApp {
                 } else {
                     reject(new Error('네트워크 오류 (Network error)'));
                 }
-            }, 2000);
+            }, 500); // Faster simulation for multiple numbers
         });
     }
 
@@ -180,6 +325,7 @@ class SMSApp {
         this.messageInput.value = '';
         this.messageInput.style.height = 'auto';
         this.updateCharCount();
+        this.updatePhoneCount();
         this.phoneInput.focus();
     }
 
@@ -214,18 +360,3 @@ document.addEventListener('DOMContentLoaded', () => {
         app.showStatus('오프라인 상태입니다. (You are offline)', 'error');
     });
 });
-
-// Add some Korean-specific phone number validation
-function validateKoreanPhoneNumber(phone) {
-    // Korean mobile numbers start with 010, 011, 016, 017, 018, 019
-    const koreanMobilePatterns = [
-        /^010-\d{4}-\d{4}$/,  // 010-XXXX-XXXX (most common)
-        /^011-\d{3}-\d{4}$/,  // 011-XXX-XXXX
-        /^016-\d{3}-\d{4}$/,  // 016-XXX-XXXX
-        /^017-\d{3}-\d{4}$/,  // 017-XXX-XXXX
-        /^018-\d{3}-\d{4}$/,  // 018-XXX-XXXX
-        /^019-\d{3}-\d{4}$/   // 019-XXX-XXXX
-    ];
-    
-    return koreanMobilePatterns.some(pattern => pattern.test(phone));
-}

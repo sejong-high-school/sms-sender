@@ -1,18 +1,22 @@
 # SMS Korea PWA 📱
 
-A Progressive Web App (PWA) designed to send SMS messages to South Korean phone numbers. This app features a modern, responsive design with bilingual support (Korean/English) and PWA capabilities.
+A Progressive Web App (PWA) designed to send SMS messages to multiple South Korean phone numbers. This app features a modern, responsive design with bilingual support (Korean/English), bulk sending capabilities, and PWA features.
 
 ## ✨ Features
 
-- **📱 SMS Sending Interface**: Clean, intuitive form for entering phone numbers and messages
+- **📱 Multiple SMS Sending**: Send to multiple phone numbers simultaneously
 - **🇰🇷 Korean Phone Number Support**: Validates and formats Korean mobile numbers (010-XXXX-XXXX)
+- **🔄 Bulk Send Mode**: Send the same message to all numbers at once
+- **📝 Individual Send Mode**: Send individual messages to each number
 - **🌐 Bilingual Support**: Korean and English interface
 - **📱 PWA Ready**: Installable on mobile and desktop devices
 - **🔄 Offline Support**: Service worker for offline functionality
 - **📝 Character Counter**: Real-time message length tracking (500 character limit)
+- **📊 Phone Number Counter**: Real-time count of valid phone numbers
 - **🎨 Modern UI**: Beautiful gradient design with smooth animations
 - **📱 Responsive Design**: Works perfectly on all device sizes
 - **⚡ Fast Performance**: Optimized for speed and user experience
+- **📈 Progress Tracking**: Real-time progress updates during bulk sending
 
 ## 🚀 Getting Started
 
@@ -142,6 +146,8 @@ The app validates Korean mobile numbers:
 - **Format**: XXX-XXXX-XXXX
 - **Prefixes**: 010, 011, 016, 017, 018, 019
 - **Example**: 010-1234-5678
+- **Multiple Numbers**: Enter one number per line
+- **Maximum**: Up to 50 numbers per batch
 
 ## 🔒 Security Notes
 
@@ -190,9 +196,53 @@ If you encounter issues:
 - [ ] Contact management
 - [ ] Message history
 - [ ] Delivery confirmations
-- [ ] Bulk messaging
 - [ ] Scheduled messages
 - [ ] Multi-language support expansion
+- [ ] CSV/Excel import for phone numbers
+- [ ] Message personalization per recipient
+- [ ] Rate limiting controls
+- [ ] Delivery reports
+
+## 📱 Usage Guide
+
+### Sending to Multiple Numbers
+
+1. **Enter Phone Numbers**: 
+   - Type or paste phone numbers, one per line
+   - Example:
+     ```
+     010-1234-5678
+     010-8765-4321
+     010-5555-1234
+     ```
+
+2. **Choose Send Mode**:
+   - **Bulk Mode**: Same message to all numbers (faster)
+   - **Individual Mode**: Individual messages to each number
+
+3. **Write Message**: 
+   - Enter your SMS message (max 500 characters)
+   - Character counter shows remaining space
+
+4. **Send**: 
+   - Click the send button
+   - Monitor progress in real-time
+   - View results summary
+
+### Phone Number Formatting
+
+The app automatically formats phone numbers as you type:
+- **Input**: 01012345678
+- **Formatted**: 010-1234-5678
+- **Validated**: Only Korean mobile numbers accepted
+
+### Progress Tracking
+
+During bulk sending, you'll see:
+- Real-time progress updates
+- Success/failure counts
+- Individual number status
+- Completion summary
 
 ---
 

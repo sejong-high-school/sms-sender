@@ -21,16 +21,22 @@
         <main class="main">
             <div class="form-container">
                 <div class="input-group">
-                    <label for="phoneNumber" class="label">전화번호 (Phone Number)</label>
-                    <input 
-                        type="tel" 
-                        id="phoneNumber" 
-                        class="input" 
-                        placeholder="010-1234-5678"
-                        pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
-                        required
-                    >
-                    <small class="help-text">한국 전화번호 형식: 010-1234-5678</small>
+                    <label for="phoneNumbers" class="label">전화번호 (Phone Numbers)</label>
+                    <div class="phone-input-container">
+                        <textarea 
+                            id="phoneNumbers" 
+                            class="textarea phone-numbers" 
+                            placeholder="한 번에 여러 번호 입력 가능&#10;예시:&#10;010-1234-5678&#10;010-8765-4321&#10;010-5555-1234"
+                            rows="4"
+                            required
+                        ></textarea>
+                        <div class="phone-help">
+                            <small class="help-text">한 줄에 하나씩 번호 입력 (Enter one number per line)</small>
+                            <div class="phone-count">
+                                <span id="phoneCount">0</span> 개의 번호
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="input-group">
@@ -48,6 +54,17 @@
                     </div>
                 </div>
 
+                <div class="send-options">
+                    <div class="option-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="bulkMode" checked>
+                            <span class="checkmark"></span>
+                            일괄 전송 모드 (Bulk Send Mode)
+                        </label>
+                        <small class="help-text">체크하면 모든 번호에 동일한 메시지 전송</small>
+                    </div>
+                </div>
+
                 <button id="sendButton" class="send-button">
                     <span class="button-text">메시지 전송</span>
                     <span class="button-icon">📱</span>
@@ -59,8 +76,9 @@
             <div class="info-section">
                 <h3>사용 방법 (How to use)</h3>
                 <ol>
-                    <li>한국 전화번호를 입력하세요 (Enter a South Korean phone number)</li>
+                    <li>한국 전화번호를 입력하세요 (한 줄에 하나씩) (Enter South Korean phone numbers, one per line)</li>
                     <li>전송할 메시지를 작성하세요 (Write your message)</li>
+                    <li>일괄 전송 모드를 선택하세요 (Choose bulk send mode)</li>
                     <li>전송 버튼을 클릭하세요 (Click the send button)</li>
                 </ol>
                 
