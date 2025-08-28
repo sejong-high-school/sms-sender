@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMS Korea - 메시지 전송</title>
+    <meta name="description" content="Send SMS messages to South Korean phone numbers">
+    <meta name="theme-color" content="#4F46E5">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">SMS Korea</h1>
+            <p class="subtitle">한국 전화번호로 메시지 전송</p>
+        </header>
+
+        <main class="main">
+            <div class="form-container">
+                <div class="input-group">
+                    <label for="phoneNumber" class="label">전화번호 (Phone Number)</label>
+                    <input 
+                        type="tel" 
+                        id="phoneNumber" 
+                        class="input" 
+                        placeholder="010-1234-5678"
+                        pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                        required
+                    >
+                    <small class="help-text">한국 전화번호 형식: 010-1234-5678</small>
+                </div>
+
+                <div class="input-group">
+                    <label for="message" class="label">메시지 (Message)</label>
+                    <textarea 
+                        id="message" 
+                        class="textarea" 
+                        placeholder="전송할 메시지를 입력하세요..."
+                        rows="4"
+                        maxlength="500"
+                        required
+                    ></textarea>
+                    <div class="char-count">
+                        <span id="charCount">0</span>/500
+                    </div>
+                </div>
+
+                <button id="sendButton" class="send-button">
+                    <span class="button-text">메시지 전송</span>
+                    <span class="button-icon">📱</span>
+                </button>
+
+                <div id="status" class="status"></div>
+            </div>
+
+            <div class="info-section">
+                <h3>사용 방법 (How to use)</h3>
+                <ol>
+                    <li>한국 전화번호를 입력하세요 (Enter a South Korean phone number)</li>
+                    <li>전송할 메시지를 작성하세요 (Write your message)</li>
+                    <li>전송 버튼을 클릭하세요 (Click the send button)</li>
+                </ol>
+                
+                <div class="note">
+                    <strong>참고:</strong> 이 앱은 데모 목적으로 제작되었습니다. 실제 SMS 전송을 위해서는 적절한 SMS API 서비스가 필요합니다.
+                    <br><br>
+                    <strong>Note:</strong> This app is created for demonstration purposes. Actual SMS sending requires an appropriate SMS API service.
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 SMS Korea PWA</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(error => console.log('SW registration failed'));
+        }
+    </script>
+</body>
+</html>

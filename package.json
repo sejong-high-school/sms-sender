@@ -1,0 +1,37 @@
+{
+  "name": "sms-korea-pwa",
+  "version": "1.0.0",
+  "description": "A Progressive Web App for sending SMS messages to South Korean phone numbers",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx serve .",
+    "dev": "npx live-server --port=8000",
+    "build": "echo 'No build step required for this PWA'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "pwa",
+    "sms",
+    "korea",
+    "progressive-web-app",
+    "mobile",
+    "communication"
+  ],
+  "author": "SMS Korea PWA",
+  "license": "MIT",
+  "devDependencies": {
+    "serve": "^14.2.0",
+    "live-server": "^1.2.2"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/sms-korea-pwa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/sms-korea-pwa/issues"
+  },
+  "homepage": "https://github.com/yourusername/sms-korea-pwa#readme"
+}
