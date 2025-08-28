@@ -1,0 +1,30 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="100" fill="#EA4335"/>
+  
+  <!-- Envelope -->
+  <rect x="100" y="150" width="312" height="212" rx="20" fill="white"/>
+  
+  <!-- Envelope flap -->
+  <path d="M100 150 L256 250 L412 150" stroke="white" stroke-width="8" fill="none"/>
+  
+  <!-- Envelope content -->
+  <rect x="120" y="180" width="272" height="152" rx="10" fill="#F8F9FA"/>
+  
+  <!-- Email lines -->
+  <rect x="140" y="200" width="200" height="8" rx="4" fill="#EA4335"/>
+  <rect x="140" y="220" width="150" height="8" rx="4" fill="#EA4335"/>
+  <rect x="140" y="240" width="180" height="8" rx="4" fill="#EA4335"/>
+  <rect x="140" y="260" width="120" height="8" rx="4" fill="#EA4335"/>
+  <rect x="140" y="280" width="160" height="8" rx="4" fill="#EA4335"/>
+  <rect x="140" y="300" width="140" height="8" rx="4" fill="#EA4335"/>
+  
+  <!-- Send icon -->
+  <circle cx="380" cy="320" r="25" fill="#34A853"/>
+  <path d="M370 320L375 325L390 310" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  
+  <!-- Gmail logo elements -->
+  <circle cx="200" cy="100" r="15" fill="#4285F4"/>
+  <circle cx="220" cy="100" r="15" fill="#EA4335"/>
+  <circle cx="240" cy="100" r="15" fill="#FBBC04"/>
+  <circle cx="260" cy="100" r="15" fill="#34A853"/>
+</svg>

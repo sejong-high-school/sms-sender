@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gmail Sender - Email PWA</title>
+    <meta name="description" content="Send emails using Google Gmail API">
+    <meta name="theme-color" content="#EA4335">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#EA4335">
+                        <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819L12 13.636 5.455 20.002H1.636A1.636 1.636 0 0 1 0 18.366V5.457c0-.904.732-1.636 1.636-1.636h20.728c.904 0 1.636.732 1.636 1.636z"/>
+                    </svg>
+                </div>
+                <h1 class="title">Gmail Sender</h1>
+                <p class="subtitle">Send emails using Gmail API</p>
+            </div>
+        </header>
+
+        <main class="main">
+            <!-- Authentication Section -->
+            <div id="authSection" class="auth-section">
+                <div class="auth-content">
+                    <h2>🔐 Gmail Authentication Required</h2>
+                    <p>To send emails, you need to authenticate with your Google account.</p>
+                    <button id="authButton" class="auth-button">
+                        <span class="button-icon">🔑</span>
+                        <span class="button-text">Sign in with Google</span>
+                    </button>
+                    <div class="auth-info">
+                        <small>This app will only access your Gmail account to send emails. No emails will be read.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Form Section -->
+            <div id="emailSection" class="email-section" style="display: none;">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>✉️ Compose Email</h2>
+                        <div class="user-info">
+                            <span id="userEmail" class="user-email"></span>
+                            <button id="signOutButton" class="sign-out-button">Sign Out</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="toEmails" class="label">To (Recipients)</label>
+                        <textarea 
+                            id="toEmails" 
+                            class="textarea email-input" 
+                            placeholder="Enter email addresses, one per line&#10;Example:&#10;john@example.com&#10;jane@company.com"
+                            rows="3"
+                            required
+                        ></textarea>
+                        <div class="email-help">
+                            <small class="help-text">Enter one email address per line</small>
+                            <div class="email-count">
+                                <span id="emailCount">0</span> recipients
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="subject" class="label">Subject</label>
+                        <input 
+                            type="text" 
+                            id="subject" 
+                            class="input" 
+                            placeholder="Enter email subject"
+                            required
+                        >
+                    </div>
+
+                    <div class="input-group">
+                        <label for="message" class="label">Message</label>
+                        <textarea 
+                            id="message" 
+                            class="textarea" 
+                            placeholder="Write your email message here..."
+                            rows="6"
+                            required
+                        ></textarea>
+                        <div class="char-count">
+                            <span id="charCount">0</span> characters
+                        </div>
+                    </div>
+
+                    <div class="send-options">
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="bulkMode" checked>
+                                <span class="checkmark"></span>
+                                Bulk Send Mode
+                            </label>
+                            <small class="help-text">Send the same email to all recipients</small>
+                        </div>
+                    </div>
+
+                    <button id="sendButton" class="send-button">
+                        <span class="button-text">Send Email</span>
+                        <span class="button-icon">📧</span>
+                    </button>
+
+                    <div id="status" class="status"></div>
+                </div>
+
+                <div class="info-section">
+                    <h3>📧 How to Use</h3>
+                    <ol>
+                        <li>Sign in with your Google account</li>
+                        <li>Enter recipient email addresses (one per line)</li>
+                        <li>Write your subject and message</li>
+                        <li>Choose bulk or individual send mode</li>
+                        <li>Click send and monitor progress</li>
+                    </ol>
+                    
+                    <div class="note">
+                        <strong>Note:</strong> This app uses Gmail API to send emails. Make sure you have Gmail enabled in your Google account.
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2024 Gmail Sender PWA</p>
+        </footer>
+    </div>
+
+    <!-- Google API Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="app.js"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(registration => console.log('SW registered'))
+                .catch(error => console.log('SW registration failed'));
+        }
+    </script>
+</body>
+</html>
