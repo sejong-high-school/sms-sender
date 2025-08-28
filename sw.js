@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sms-korea-v1';
+const CACHE_NAME = 'gmail-sender-v1';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -49,17 +49,17 @@ self.addEventListener('activate', event => {
     );
 });
 
-// Background sync for offline SMS sending
+// Background sync for offline email sending
 self.addEventListener('sync', event => {
-    if (event.tag === 'send-sms') {
-        event.waitUntil(sendOfflineSMS());
+    if (event.tag === 'send-email') {
+        event.waitUntil(sendOfflineEmails());
     }
 });
 
-// Handle push notifications (for future SMS delivery confirmations)
+// Handle push notifications (for future email delivery confirmations)
 self.addEventListener('push', event => {
     const options = {
-        body: event.data ? event.data.text() : '새로운 메시지가 도착했습니다!',
+        body: event.data ? event.data.text() : 'New email sent successfully!',
         icon: '/icons/icon-192x192.png',
         badge: '/icons/icon-72x72.png',
         vibrate: [100, 50, 100],
@@ -70,19 +70,19 @@ self.addEventListener('push', event => {
         actions: [
             {
                 action: 'explore',
-                title: '확인하기',
+                title: 'View',
                 icon: '/icons/icon-72x72.png'
             },
             {
                 action: 'close',
-                title: '닫기',
+                title: 'Close',
                 icon: '/icons/icon-72x72.png'
             }
         ]
     };
 
     event.waitUntil(
-        self.registration.showNotification('SMS Korea', options)
+        self.registration.showNotification('Gmail Sender', options)
     );
 });
 
@@ -97,45 +97,45 @@ self.addEventListener('notificationclick', event => {
     }
 });
 
-// Function to handle offline SMS sending
-async function sendOfflineSMS() {
+// Function to handle offline email sending
+async function sendOfflineEmails() {
     try {
-        // Get offline SMS data from IndexedDB
-        const offlineSMS = await getOfflineSMS();
+        // Get offline email data from IndexedDB
+        const offlineEmails = await getOfflineEmails();
         
-        if (offlineSMS.length > 0) {
-            // Try to send each offline SMS
-            for (const sms of offlineSMS) {
+        if (offlineEmails.length > 0) {
+            // Try to send each offline email
+            for (const email of offlineEmails) {
                 try {
-                    await sendSMS(sms);
-                    await removeOfflineSMS(sms.id);
+                    await sendEmail(email);
+                    await removeOfflineEmail(email.id);
                 } catch (error) {
-                    console.error('Failed to send offline SMS:', error);
+                    console.error('Failed to send offline email:', error);
                 }
             }
         }
     } catch (error) {
-        console.error('Error in offline SMS sync:', error);
+        console.error('Error in offline email sync:', error);
     }
 }
 
-// Helper functions for offline SMS handling
-async function getOfflineSMS() {
+// Helper functions for offline email handling
+async function getOfflineEmails() {
     // This would typically use IndexedDB
     // For now, return empty array
     return [];
 }
 
-async function sendSMS(smsData) {
-    // This would make the actual API call
+async function sendEmail(emailData) {
+    // This would make the actual Gmail API call
     // For now, just simulate
     return new Promise((resolve) => {
         setTimeout(resolve, 1000);
     });
 }
 
-async function removeOfflineSMS(id) {
-    // This would remove the SMS from IndexedDB
+async function removeOfflineEmail(id) {
+    // This would remove the email from IndexedDB
     // For now, just log
-    console.log('Removing offline SMS:', id);
+    console.log('Removing offline email:', id);
 }

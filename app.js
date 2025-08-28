@@ -1,23 +1,39 @@
-class SMSApp {
+class GmailSenderApp {
     constructor() {
-        this.phoneInput = document.getElementById('phoneNumbers');
+        this.CLIENT_ID = 'YOUR_GOOGLE_CLIENT_ID'; // Replace with your Google OAuth client ID
+        this.API_KEY = 'YOUR_GOOGLE_API_KEY'; // Replace with your Google API key
+        this.SCOPES = ['https://www.googleapis.com/auth/gmail.send'];
+        this.DISCOVERY_DOCS = ['https://www.googleapis.com/discovery/v1/apis/gmail/v1/rest'];
+        
+        this.toEmailsInput = document.getElementById('toEmails');
+        this.subjectInput = document.getElementById('subject');
         this.messageInput = document.getElementById('message');
         this.sendButton = document.getElementById('sendButton');
         this.statusDiv = document.getElementById('status');
         this.charCount = document.getElementById('charCount');
-        this.phoneCount = document.getElementById('phoneCount');
+        this.emailCount = document.getElementById('emailCount');
         this.bulkMode = document.getElementById('bulkMode');
+        this.authSection = document.getElementById('authSection');
+        this.emailSection = document.getElementById('emailSection');
+        this.authButton = document.getElementById('authButton');
+        this.signOutButton = document.getElementById('signOutButton');
+        this.userEmailSpan = document.getElementById('userEmail');
+        
+        this.isAuthenticated = false;
+        this.gapi = null;
+        this.gapiLoaded = false;
+        this.gisLoaded = false;
         
         this.initializeEventListeners();
+        this.initializeGoogleAPIs();
         this.updateCharCount();
-        this.updatePhoneCount();
-        this.checkDeviceCapabilities();
+        this.updateEmailCount();
     }
 
     initializeEventListeners() {
-        // Phone numbers formatting and counting
-        this.phoneInput.addEventListener('input', () => {
-            this.updatePhoneCount();
+        // Email count update
+        this.toEmailsInput.addEventListener('input', () => {
+            this.updateEmailCount();
         });
 
         // Character count update
@@ -27,19 +43,24 @@ class SMSApp {
 
         // Send button click
         this.sendButton.addEventListener('click', () => {
-            this.sendSMS();
+            this.sendEmails();
         });
 
         // Enter key support
         this.messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && e.ctrlKey) {
-                this.sendSMS();
+                this.sendEmails();
             }
         });
 
-        // Auto-resize textarea
-        this.messageInput.addEventListener('input', () => {
-            this.autoResizeTextarea();
+        // Auth button click
+        this.authButton.addEventListener('click', () => {
+            this.handleAuthClick();
+        });
+
+        // Sign out button click
+        this.signOutButton.addEventListener('click', () => {
+            this.handleSignOut();
         });
 
         // Bulk mode toggle
@@ -48,133 +69,225 @@ class SMSApp {
         });
     }
 
-    checkDeviceCapabilities() {
-        // Check if running on mobile device
-        this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        // Check if SMS URL scheme is supported
-        this.smsSupported = 'sms' in navigator || this.isMobile;
-        
-        if (this.smsSupported) {
-            this.showStatus('모바일 SMS 기능이 활성화되었습니다! (Mobile SMS functionality activated!)', 'success');
-            setTimeout(() => this.clearStatus(), 3000);
+    async initializeGoogleAPIs() {
+        try {
+            // Load Google API
+            await this.loadGapi();
+            
+            // Load Google Identity Services
+            await this.loadGis();
+            
+            // Initialize the app
+            this.initializeApp();
+        } catch (error) {
+            console.error('Failed to initialize Google APIs:', error);
+            this.showStatus('Failed to load Google APIs. Please refresh the page.', 'error');
         }
     }
 
-    updatePhoneCount() {
-        const phoneNumbers = this.getPhoneNumbers();
-        const count = phoneNumbers.length;
-        this.phoneCount.textContent = count;
+    async loadGapi() {
+        return new Promise((resolve, reject) => {
+            if (window.gapi) {
+                this.gapi = window.gapi;
+                resolve();
+            } else {
+                // Wait for gapi to load
+                const checkGapi = setInterval(() => {
+                    if (window.gapi) {
+                        this.gapi = window.gapi;
+                        clearInterval(checkGapi);
+                        resolve();
+                    }
+                }, 100);
+                
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    clearInterval(checkGapi);
+                    reject(new Error('GAPI failed to load'));
+                }, 10000);
+            }
+        });
+    }
+
+    async loadGis() {
+        return new Promise((resolve, reject) => {
+            if (window.google) {
+                resolve();
+            } else {
+                // Wait for Google Identity Services to load
+                const checkGis = setInterval(() => {
+                    if (window.google) {
+                        clearInterval(checkGis);
+                        resolve();
+                    }
+                }, 100);
+                
+                // Timeout after 10 seconds
+                setTimeout(() => {
+                    clearInterval(checkGis);
+                    reject(new Error('Google Identity Services failed to load'));
+                }, 10000);
+            }
+        });
+    }
+
+    async initializeApp() {
+        try {
+            // Initialize GAPI
+            await this.gapi.load('client:auth2', async () => {
+                await this.gapi.client.init({
+                    apiKey: this.API_KEY,
+                    clientId: this.CLIENT_ID,
+                    scope: this.SCOPES.join(' '),
+                    discoveryDocs: this.DISCOVERY_DOCS
+                });
+
+                // Check if user is already signed in
+                if (this.gapi.auth2.getAuthInstance().isSignedIn.get()) {
+                    this.handleAuthSuccess();
+                }
+            });
+        } catch (error) {
+            console.error('Failed to initialize GAPI client:', error);
+            this.showStatus('Failed to initialize Gmail API. Please check your configuration.', 'error');
+        }
+    }
+
+    async handleAuthClick() {
+        try {
+            const authInstance = this.gapi.auth2.getAuthInstance();
+            const user = await authInstance.signIn();
+            
+            if (user) {
+                this.handleAuthSuccess();
+            }
+        } catch (error) {
+            console.error('Authentication failed:', error);
+            this.showStatus('Authentication failed. Please try again.', 'error');
+        }
+    }
+
+    handleAuthSuccess() {
+        this.isAuthenticated = true;
+        const user = this.gapi.auth2.getAuthInstance().currentUser.get();
+        const profile = user.getBasicProfile();
         
-        // Update button text based on count
+        // Update UI
+        this.authSection.style.display = 'none';
+        this.emailSection.style.display = 'block';
+        this.userEmailSpan.textContent = profile.getEmail();
+        
+        this.showStatus('Successfully authenticated with Gmail! You can now send emails.', 'success');
+        setTimeout(() => this.clearStatus(), 3000);
+    }
+
+    handleSignOut() {
+        this.gapi.auth2.getAuthInstance().signOut().then(() => {
+            this.isAuthenticated = false;
+            this.authSection.style.display = 'block';
+            this.emailSection.style.display = 'none';
+            this.userEmailSpan.textContent = '';
+            this.clearForm();
+            this.showStatus('Signed out successfully.', 'info');
+            setTimeout(() => this.clearStatus(), 3000);
+        });
+    }
+
+    updateEmailCount() {
+        const emails = this.getEmailAddresses();
+        const count = emails.length;
+        this.emailCount.textContent = count;
         this.updateSendButtonText();
     }
 
     updateSendButtonText() {
-        const phoneNumbers = this.getPhoneNumbers();
-        const count = phoneNumbers.length;
+        const emails = this.getEmailAddresses();
+        const count = emails.length;
         const isBulkMode = this.bulkMode.checked;
         
         if (count === 0) {
-            this.sendButton.querySelector('.button-text').textContent = '전화번호 입력 필요';
+            this.sendButton.querySelector('.button-text').textContent = 'Enter Recipients';
         } else if (count === 1) {
-            this.sendButton.querySelector('.button-text').textContent = 'SMS 전송';
+            this.sendButton.querySelector('.button-text').textContent = 'Send Email';
         } else if (isBulkMode) {
-            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 SMS 전송`;
+            this.sendButton.querySelector('.button-text').textContent = `Send to ${count} Recipients`;
         } else {
-            this.sendButton.querySelector('.button-text').textContent = `${count}개 번호에 개별 SMS`;
+            this.sendButton.querySelector('.button-text').textContent = `Send ${count} Individual Emails`;
         }
     }
 
-    getPhoneNumbers() {
-        const input = this.phoneInput.value.trim();
+    getEmailAddresses() {
+        const input = this.toEmailsInput.value.trim();
         if (!input) return [];
         
         return input
             .split('\n')
             .map(line => line.trim())
             .filter(line => line.length > 0)
-            .map(phone => this.formatPhoneNumber(phone))
-            .filter(phone => this.isValidKoreanPhoneNumber(phone));
+            .filter(email => this.isValidEmail(email));
     }
 
-    formatPhoneNumber(input) {
-        let value = input.replace(/\D/g, '');
-        
-        if (value.length >= 3) {
-            value = value.slice(0, 3) + '-' + value.slice(3);
-        }
-        if (value.length >= 8) {
-            value = value.slice(0, 8) + '-' + value.slice(8);
-        }
-        if (value.length > 13) {
-            value = value.slice(0, 13);
-        }
-        
-        return value;
-    }
-
-    isValidKoreanPhoneNumber(phone) {
-        // Korean mobile numbers start with 010, 011, 016, 017, 018, 019
-        const koreanMobilePatterns = [
-            /^010-\d{4}-\d{4}$/,  // 010-XXXX-XXXX (most common)
-            /^011-\d{3}-\d{4}$/,  // 011-XXX-XXXX
-            /^016-\d{3}-\d{4}$/,  // 016-XXX-XXXX
-            /^017-\d{3}-\d{4}$/,  // 017-XXX-XXXX
-            /^018-\d{3}-\d{4}$/,  // 018-XXX-XXXX
-            /^019-\d{3}-\d{4}$/   // 019-XXX-XXXX
-        ];
-        
-        return koreanMobilePatterns.some(pattern => pattern.test(phone));
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
     updateCharCount() {
         const count = this.messageInput.value.length;
         this.charCount.textContent = count;
         
-        if (count > 450) {
+        if (count > 1000) {
             this.charCount.style.color = '#dc2626';
-        } else if (count > 400) {
+        } else if (count > 800) {
             this.charCount.style.color = '#ea580c';
         } else {
             this.charCount.style.color = '#6b7280';
         }
     }
 
-    autoResizeTextarea() {
-        this.messageInput.style.height = 'auto';
-        this.messageInput.style.height = this.messageInput.scrollHeight + 'px';
-    }
-
     validateForm() {
-        const phoneNumbers = this.getPhoneNumbers();
+        const emails = this.getEmailAddresses();
+        const subject = this.subjectInput.value.trim();
         const message = this.messageInput.value.trim();
 
         // Clear previous status
         this.clearStatus();
 
-        // Validate phone numbers
-        if (phoneNumbers.length === 0) {
-            this.showStatus('하나 이상의 유효한 전화번호를 입력해주세요. (Please enter at least one valid phone number)', 'error');
-            this.phoneInput.focus();
+        // Validate emails
+        if (emails.length === 0) {
+            this.showStatus('Please enter at least one valid email address.', 'error');
+            this.toEmailsInput.focus();
             return false;
         }
 
-        if (phoneNumbers.length > 10) {
-            this.showStatus('한 번에 최대 10개 번호까지만 전송 가능합니다. (Maximum 10 numbers can be sent at once)', 'error');
-            this.phoneInput.focus();
+        if (emails.length > 20) {
+            this.showStatus('Maximum 20 recipients allowed per batch.', 'error');
+            this.toEmailsInput.focus();
+            return false;
+        }
+
+        // Validate subject
+        if (!subject) {
+            this.showStatus('Please enter an email subject.', 'error');
+            this.subjectInput.focus();
+            return false;
+        }
+
+        if (subject.length > 100) {
+            this.showStatus('Subject cannot exceed 100 characters.', 'error');
+            this.subjectInput.focus();
             return false;
         }
 
         // Validate message
         if (!message) {
-            this.showStatus('메시지를 입력해주세요. (Please enter a message)', 'error');
+            this.showStatus('Please enter an email message.', 'error');
             this.messageInput.focus();
             return false;
         }
 
-        if (message.length > 500) {
-            this.showStatus('메시지는 500자를 초과할 수 없습니다. (Message cannot exceed 500 characters)', 'error');
+        if (message.length > 10000) {
+            this.showStatus('Message cannot exceed 10,000 characters.', 'error');
             this.messageInput.focus();
             return false;
         }
@@ -182,224 +295,166 @@ class SMSApp {
         return true;
     }
 
-    async sendSMS() {
+    async sendEmails() {
         if (!this.validateForm()) {
             return;
         }
 
-        const phoneNumbers = this.getPhoneNumbers();
+        if (!this.isAuthenticated) {
+            this.showStatus('Please authenticate with Google first.', 'error');
+            return;
+        }
+
+        const emails = this.getEmailAddresses();
+        const subject = this.subjectInput.value.trim();
         const message = this.messageInput.value.trim();
         const isBulkMode = this.bulkMode.checked;
 
-        if (this.smsSupported && this.isMobile) {
-            // Use native SMS functionality on mobile
-            this.sendNativeSMS(phoneNumbers, message, isBulkMode);
-        } else {
-            // Fallback to simulated sending
-            this.sendSimulatedSMS(phoneNumbers, message, isBulkMode);
-        }
-    }
-
-    sendNativeSMS(phoneNumbers, message, isBulkMode) {
-        if (phoneNumbers.length === 1) {
-            // Single number - open SMS app directly
-            this.openSMSApp(phoneNumbers[0], message);
-        } else if (isBulkMode) {
-            // Multiple numbers - show instructions
-            this.showBulkSMSInstructions(phoneNumbers, message);
-        } else {
-            // Individual mode - show instructions for each
-            this.showIndividualSMSInstructions(phoneNumbers, message);
-        }
-    }
-
-    openSMSApp(phone, message) {
-        try {
-            // Remove dashes for SMS URL
-            const cleanPhone = phone.replace(/-/g, '');
-            
-            // Create SMS URL
-            const smsUrl = `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
-            
-            // Try to open SMS app
-            if (navigator.share && navigator.canShare) {
-                // Use Web Share API if available
-                navigator.share({
-                    title: 'SMS 전송',
-                    text: message,
-                    url: smsUrl
-                }).catch(() => {
-                    // Fallback to direct SMS URL
-                    window.location.href = smsUrl;
-                });
-            } else {
-                // Direct SMS URL
-                window.location.href = smsUrl;
-            }
-            
-            this.showStatus('SMS 앱이 열렸습니다. 전송 버튼을 눌러주세요. (SMS app opened. Please press send.)', 'success');
-            
-        } catch (error) {
-            this.showStatus('SMS 앱을 열 수 없습니다. (Cannot open SMS app)', 'error');
-            console.error('SMS app error:', error);
-        }
-    }
-
-    showBulkSMSInstructions(phoneNumbers, message) {
-        const instructions = `📱 ${phoneNumbers.length}개 번호에 SMS 전송하기:
-
-1. 아래 번호들을 복사하세요:
-${phoneNumbers.join('\n')}
-
-2. 메시지 내용:
-${message}
-
-3. 각 번호에 개별적으로 SMS를 보내주세요.
-
-또는 일괄 전송을 위해 SMS API 서비스를 연동하세요.`;
-
-        this.showStatus(instructions, 'info');
-        
-        // Copy to clipboard if possible
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText(phoneNumbers.join('\n'));
-            setTimeout(() => {
-                this.showStatus('전화번호가 클립보드에 복사되었습니다! (Phone numbers copied to clipboard!)', 'success');
-            }, 1000);
-        }
-    }
-
-    showIndividualSMSInstructions(phoneNumbers, message) {
-        const instructions = `📱 ${phoneNumbers.length}개 번호에 개별 SMS 전송:
-
-각 번호에 개별적으로 메시지를 보내주세요.
-메시지 내용: ${message}`;
-
-        this.showStatus(instructions, 'info');
-    }
-
-    async sendSimulatedSMS(phoneNumbers, message, isBulkMode) {
         // Show loading state
         this.setLoadingState(true);
         
         if (isBulkMode) {
-            this.showStatus(`${phoneNumbers.length}개 번호에 메시지를 전송 중입니다... (Sending message to ${phoneNumbers.length} numbers...)`, 'loading');
+            this.showStatus(`Sending email to ${emails.length} recipients...`, 'loading');
         } else {
-            this.showStatus(`${phoneNumbers.length}개 번호에 개별 메시지를 전송 중입니다... (Sending individual messages to ${phoneNumbers.length} numbers...)`, 'loading');
+            this.showStatus(`Sending ${emails.length} individual emails...`, 'loading');
         }
 
         try {
             let results;
             
             if (isBulkMode) {
-                results = await this.sendBulkSMS(phoneNumbers, message);
+                results = await this.sendBulkEmails(emails, subject, message);
             } else {
-                results = await this.sendIndividualSMS(phoneNumbers, message);
+                results = await this.sendIndividualEmails(emails, subject, message);
             }
             
-            // Show success with results
+            // Show results
             this.showResults(results);
             
-            // Clear form
-            this.clearForm();
+            // Clear form on success
+            if (results.failed === 0) {
+                this.clearForm();
+            }
             
             // Reset button state
             this.setLoadingState(false);
             
         } catch (error) {
-            this.showStatus(`전송 실패: ${error.message} (Send failed: ${error.message})`, 'error');
+            this.showStatus(`Failed to send emails: ${error.message}`, 'error');
             this.setLoadingState(false);
         }
     }
 
-    async sendBulkSMS(phoneNumbers, message) {
-        // Simulate bulk SMS sending
+    async sendBulkEmails(emails, subject, message) {
         const results = {
-            total: phoneNumbers.length,
+            total: emails.length,
             successful: 0,
             failed: 0,
             details: []
         };
 
-        for (let i = 0; i < phoneNumbers.length; i++) {
-            const phone = phoneNumbers[i];
+        for (let i = 0; i < emails.length; i++) {
+            const email = emails[i];
             try {
-                await this.simulateAPICall(phone, message);
+                await this.sendSingleEmail(email, subject, message);
                 results.successful++;
-                results.details.push({ phone, status: 'success' });
+                results.details.push({ email, status: 'success' });
             } catch (error) {
                 results.failed++;
-                results.details.push({ phone, status: 'failed', error: error.message });
+                results.details.push({ email, status: 'failed', error: error.message });
             }
             
             // Update progress
-            if (i % 5 === 0 || i === phoneNumbers.length - 1) {
-                this.showStatus(`진행률: ${i + 1}/${phoneNumbers.length} (${Math.round((i + 1) / phoneNumbers.length * 100)}%)`, 'info');
+            if (i % 5 === 0 || i === emails.length - 1) {
+                this.showStatus(`Progress: ${i + 1}/${emails.length} (${Math.round((i + 1) / emails.length * 100)}%)`, 'info');
             }
             
             // Small delay between sends to avoid rate limiting
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
         return results;
     }
 
-    async sendIndividualSMS(phoneNumbers, message) {
-        // Simulate individual SMS sending (could be different messages per number)
+    async sendIndividualEmails(emails, subject, message) {
         const results = {
-            total: phoneNumbers.length,
+            total: emails.length,
             successful: 0,
             failed: 0,
             details: []
         };
 
-        for (let i = 0; i < phoneNumbers.length; i++) {
-            const phone = phoneNumbers[i];
+        for (let i = 0; i < emails.length; i++) {
+            const email = emails[i];
             try {
-                await this.simulateAPICall(phone, message);
+                await this.sendSingleEmail(email, subject, message);
                 results.successful++;
-                results.details.push({ phone, status: 'success' });
+                results.details.push({ email, status: 'success' });
             } catch (error) {
                 results.failed++;
-                results.details.push({ phone, status: 'failed', error: error.message });
+                results.details.push({ email, status: 'failed', error: error.message });
             }
             
             // Update progress
-            if (i % 5 === 0 || i === phoneNumbers.length - 1) {
-                this.showStatus(`진행률: ${i + 1}/${phoneNumbers.length} (${Math.round((i + 1) / phoneNumbers.length * 100)}%)`, 'info');
+            if (i % 5 === 0 || i === emails.length - 1) {
+                this.showStatus(`Progress: ${i + 1}/${emails.length} (${Math.round((i + 1) / emails.length * 100)}%)`, 'info');
             }
             
             // Small delay between sends
-            await new Promise(resolve => setTimeout(resolve, 200));
+            await new Promise(resolve => setTimeout(resolve, 1000));
         }
 
         return results;
+    }
+
+    async sendSingleEmail(to, subject, message) {
+        try {
+            // Create email in base64 format
+            const email = this.createEmail(to, subject, message);
+            
+            // Send email using Gmail API
+            const response = await this.gapi.client.gmail.users.messages.send({
+                userId: 'me',
+                resource: {
+                    raw: email
+                }
+            });
+
+            if (response.status === 200) {
+                return response.result;
+            } else {
+                throw new Error(`Gmail API error: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Failed to send email:', error);
+            throw new Error(`Failed to send to ${to}: ${error.message}`);
+        }
+    }
+
+    createEmail(to, subject, message) {
+        const email = [
+            `To: ${to}`,
+            `Subject: ${subject}`,
+            'MIME-Version: 1.0',
+            'Content-Type: text/plain; charset=utf-8',
+            '',
+            message
+        ].join('\r\n');
+
+        // Convert to base64
+        return btoa(unescape(encodeURIComponent(email))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     }
 
     showResults(results) {
         const { total, successful, failed } = results;
         
         if (failed === 0) {
-            this.showStatus(`성공! ${total}개 번호에 모두 전송되었습니다! (Success! Sent to all ${total} numbers!)`, 'success');
+            this.showStatus(`Success! Email sent to all ${total} recipients!`, 'success');
         } else if (successful === 0) {
-            this.showStatus(`실패! 모든 번호에 전송 실패했습니다. (Failed! Failed to send to all numbers.)`, 'error');
+            this.showStatus(`Failed! Could not send to any recipients.`, 'error');
         } else {
-            this.showStatus(`부분 성공: ${successful}개 성공, ${failed}개 실패 (Partial success: ${successful} successful, ${failed} failed)`, 'info');
+            this.showStatus(`Partial success: ${successful} successful, ${failed} failed`, 'info');
         }
-    }
-
-    async simulateAPICall(phone, message) {
-        // This is a simulation - in a real app, you would integrate with an SMS API service
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                // Simulate 90% success rate
-                if (Math.random() > 0.1) {
-                    resolve({ success: true, messageId: 'demo-' + Date.now() });
-                } else {
-                    reject(new Error('네트워크 오류 (Network error)'));
-                }
-            }, 500); // Faster simulation for multiple numbers
-        });
     }
 
     setLoadingState(loading) {
@@ -426,12 +481,12 @@ ${message}
     }
 
     clearForm() {
-        this.phoneInput.value = '';
+        this.toEmailsInput.value = '';
+        this.subjectInput.value = '';
         this.messageInput.value = '';
-        this.messageInput.style.height = 'auto';
         this.updateCharCount();
-        this.updatePhoneCount();
-        this.phoneInput.focus();
+        this.updateEmailCount();
+        this.toEmailsInput.focus();
     }
 
     // PWA installation prompt
@@ -443,25 +498,25 @@ ${message}
             deferredPrompt = e;
             
             // Show custom install button or notification
-            this.showStatus('이 앱을 홈 화면에 설치할 수 있습니다! (You can install this app on your home screen!)', 'success');
+            this.showStatus('You can install this app on your home screen!', 'success');
         });
     }
 }
 
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new SMSApp();
+    const app = new GmailSenderApp();
     
     // Show install prompt if available
     app.showInstallPrompt();
     
     // Add offline/online status
     window.addEventListener('online', () => {
-        app.showStatus('온라인 상태입니다. (You are online)', 'success');
+        app.showStatus('You are online', 'success');
         setTimeout(() => app.clearStatus(), 3000);
     });
     
     window.addEventListener('offline', () => {
-        app.showStatus('오프라인 상태입니다. (You are offline)', 'error');
+        app.showStatus('You are offline', 'error');
     });
 });

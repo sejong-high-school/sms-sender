@@ -1,49 +1,81 @@
-# SMS Korea PWA 📱
+# Gmail Sender PWA 📧
 
-A Progressive Web App (PWA) designed to send **REAL SMS messages** to multiple South Korean phone numbers. This app features a modern, responsive design with bilingual support (Korean/English), bulk sending capabilities, and **native SMS functionality on mobile devices**.
+A Progressive Web App (PWA) designed to send emails using the **Google Gmail API**. This app features a modern, responsive design with Google OAuth authentication and real email sending capabilities.
 
 ## ✨ Features
 
-- **📱 REAL SMS SENDING**: Actually sends SMS messages on mobile devices!
-- **🇰🇷 Korean Phone Number Support**: Validates and formats Korean mobile numbers (010-XXXX-XXXX)
-- **🔄 Bulk Send Mode**: Send the same message to all numbers at once
-- **📝 Individual Send Mode**: Send individual messages to each number
-- **🌐 Bilingual Support**: Korean and English interface
+- **📧 REAL EMAIL SENDING**: Actually sends emails using Gmail API!
+- **🔐 Google OAuth**: Secure authentication with your Google account
 - **📱 PWA Ready**: Installable on mobile and desktop devices
-- **🔄 Offline Support**: Service worker for offline functionality
-- **📝 Character Counter**: Real-time message length tracking (500 character limit)
-- **📊 Phone Number Counter**: Real-time count of valid phone numbers
-- **🎨 Modern UI**: Beautiful gradient design with smooth animations
+- **🔄 Bulk Send Mode**: Send the same email to multiple recipients
+- **📝 Individual Send Mode**: Send individual emails to each recipient
+- **📊 Email Validation**: Real-time email address validation
+- **🎨 Modern UI**: Beautiful Gmail-inspired design with smooth animations
 - **📱 Responsive Design**: Works perfectly on all device sizes
 - **⚡ Fast Performance**: Optimized for speed and user experience
-- **📈 Progress Tracking**: Real-time progress updates during bulk sending
-- **📱 Native SMS Integration**: Opens default SMS app on mobile devices
+- **📈 Progress Tracking**: Real-time progress updates during sending
+- **🔄 Offline Support**: Service worker for offline functionality
 
-## 🚀 **실제 SMS 전송 (Real SMS Sending)**
+## 🚀 **Real Email Sending with Gmail API**
 
-### **📱 모바일에서 실제 SMS 전송**
-- **PWA 설치 후**: 홈 화면에 설치하면 네이티브 앱처럼 작동
-- **자동 SMS 앱 열기**: 전화번호와 메시지가 자동으로 입력됨
-- **삼성 메시지, 카카오톡 등**: 기본 SMS 앱과 동일하게 작동
-- **실제 SMS 전송**: 사용자가 전송 버튼만 누르면 됨
+### **🔐 Google Authentication Required**
+- **OAuth 2.0**: Secure authentication with your Google account
+- **Gmail API Access**: Only sends emails, never reads your emails
+- **Scoped Permissions**: Minimal access required for sending
 
-### **💻 데스크톱에서 사용**
-- **시뮬레이션 모드**: 실제 SMS 전송을 시뮬레이션
-- **SMS API 연동**: Twilio, Nexmo 등 SMS 서비스와 연동 가능
+### **📧 Actual Email Functionality**
+- **Real Gmail API**: Uses official Google Gmail API
+- **Base64 Encoding**: Properly formatted emails for Gmail
+- **Rate Limiting**: Built-in delays to respect Gmail limits
+- **Error Handling**: Comprehensive error reporting
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - A modern web browser (Chrome, Firefox, Safari, Edge)
-- **Mobile device recommended** for real SMS functionality
-- For actual SMS sending on desktop: An SMS API service (Twilio, Nexmo, etc.)
+- **Google account with Gmail enabled**
+- **Google Cloud Project with Gmail API enabled**
+- **OAuth 2.0 credentials configured**
 
-### Installation
+### Setup Instructions
+
+#### 1. **Google Cloud Project Setup**
+
+1. **Create a Google Cloud Project**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
+
+2. **Enable Gmail API**:
+   - Go to "APIs & Services" > "Library"
+   - Search for "Gmail API" and enable it
+
+3. **Create OAuth 2.0 Credentials**:
+   - Go to "APIs & Services" > "Credentials"
+   - Click "Create Credentials" > "OAuth 2.0 Client IDs"
+   - Choose "Web application"
+   - Add authorized JavaScript origins (your domain)
+   - Add authorized redirect URIs
+
+4. **Get Your Credentials**:
+   - Copy the **Client ID** and **API Key**
+   - Update them in `app.js`
+
+#### 2. **Update Configuration**
+
+In `app.js`, replace the placeholder values:
+
+```javascript
+this.CLIENT_ID = 'YOUR_ACTUAL_CLIENT_ID'; // From Google Cloud Console
+this.API_KEY = 'YOUR_ACTUAL_API_KEY';     // From Google Cloud Console
+```
+
+#### 3. **Installation**
 
 1. **Clone or download** the project files
-2. **Open** `index.html` in your web browser
-3. **Install as PWA**: 
+2. **Update credentials** in `app.js`
+3. **Open** `index.html` in your web browser
+4. **Install as PWA**: 
    - On mobile: Add to home screen when prompted
    - On desktop: Look for the install button in the address bar
 
@@ -66,10 +98,10 @@ A Progressive Web App (PWA) designed to send **REAL SMS messages** to multiple S
 ## 📁 Project Structure
 
 ```
-sms-korea-pwa/
+gmail-sender-pwa/
 ├── index.html          # Main HTML file
-├── styles.css          # CSS styling
-├── app.js             # JavaScript functionality with real SMS
+├── styles.css          # CSS styling (Gmail-inspired)
+├── app.js             # JavaScript with Gmail API integration
 ├── manifest.json      # PWA manifest
 ├── sw.js             # Service worker
 ├── icons/            # App icons
@@ -82,66 +114,44 @@ sms-korea-pwa/
 ### PWA Settings
 
 The app is configured as a PWA with:
-- **Name**: SMS Korea - 실제 SMS 전송
+- **Name**: Gmail Sender - Email PWA
 - **Display**: Standalone (app-like experience)
-- **Theme Color**: #4F46E5 (Indigo)
-- **Background Color**: #667eea (Blue gradient)
+- **Theme Color**: #EA4335 (Gmail Red)
+- **Background Color**: #EA4335 (Gmail Red)
 
-### SMS API Integration
+### Gmail API Integration
 
-To enable actual SMS sending on desktop, you'll need to:
-
-1. **Choose an SMS API service**:
-   - [Twilio](https://www.twilio.com/sms)
-   - [Nexmo/Vonage](https://www.vonage.com/communications-apis/sms/)
-   - [AWS SNS](https://aws.amazon.com/sns/)
-   - Local Korean SMS gateways
-
-2. **Modify the `sendSMS` function** in `app.js`:
-   ```javascript
-   async function sendSMS(phone, message) {
-       // Replace with your actual API call
-       const response = await fetch('your-sms-api-endpoint', {
-           method: 'POST',
-           headers: {
-               'Content-Type': 'application/json',
-               'Authorization': 'Bearer YOUR_API_KEY'
-           },
-           body: JSON.stringify({
-               to: phone,
-               message: message
-           })
-       });
-       
-       return response.json();
-   }
-   ```
+The app integrates with Gmail API using:
+- **OAuth 2.0**: Secure authentication
+- **Gmail API v1**: Official Google API
+- **Send-only scope**: `https://www.googleapis.com/auth/gmail.send`
+- **Base64 encoding**: Proper email formatting
 
 ## 📱 PWA Features
 
 ### Installation
-- **Mobile**: Add to home screen for app-like experience with real SMS
+- **Mobile**: Add to home screen for app-like experience
 - **Desktop**: Install from browser for desktop app
 
 ### Offline Support
 - App works offline after first visit
 - Service worker caches essential resources
-- Background sync for offline SMS (when implemented)
+- Background sync for offline emails (when implemented)
 
 ### Notifications
-- Push notification support for SMS delivery confirmations
+- Push notification support for email delivery confirmations
 - Custom notification actions
 
 ## 🎨 Customization
 
 ### Colors
-The app uses a modern color scheme that can be customized in `styles.css`:
-- **Primary**: #4F46E5 (Indigo)
-- **Secondary**: #7C3AED (Purple)
-- **Background**: Linear gradient from #667eea to #764ba2
+The app uses Gmail-inspired colors that can be customized in `styles.css`:
+- **Primary**: #EA4335 (Gmail Red)
+- **Secondary**: #C62828 (Dark Red)
+- **Background**: Linear gradient from #EA4335 to #C62828
 
 ### Language
-The app supports Korean and English. To add more languages:
+The app is currently in English. To add more languages:
 1. Add language files
 2. Modify the `showStatus` function
 3. Update HTML content
@@ -154,28 +164,29 @@ The app supports Korean and English. To add more languages:
 - ✅ Edge 79+
 - ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
-## 📋 Phone Number Validation
+## 📋 Email Validation
 
-The app validates Korean mobile numbers:
-- **Format**: XXX-XXXX-XXXX
-- **Prefixes**: 010, 011, 016, 017, 018, 019
-- **Example**: 010-1234-5678
-- **Multiple Numbers**: Enter one number per line
-- **Maximum**: Up to 10 numbers per batch (for real SMS)
+The app validates email addresses:
+- **Format**: Standard email format validation
+- **Multiple Recipients**: Enter one email per line
+- **Maximum**: Up to 20 recipients per batch
+- **Real-time**: Instant validation feedback
 
 ## 🔒 Security Notes
 
-- **Real SMS on Mobile**: PWA 설치 후 모바일에서 실제 SMS 전송 가능
-- **Desktop Simulation**: 데스크톱에서는 시뮬레이션 모드
-- **API Keys**: Never expose API keys in client-side code
+- **OAuth 2.0**: Secure Google authentication
+- **Gmail API**: Official Google API integration
+- **Send-only**: Never reads your emails
 - **HTTPS Required**: PWA features require HTTPS in production
+- **API Keys**: Store securely, never expose in client-side code
 
 ## 🚀 Deployment
 
 ### Production Requirements
-- **HTTPS**: Required for PWA features
+- **HTTPS**: Required for PWA features and Gmail API
 - **Valid SSL Certificate**: For security and PWA installation
 - **Proper Headers**: Cache and security headers
+- **Google Cloud**: Configured OAuth credentials
 
 ### Hosting Options
 - **Netlify**: Easy deployment with HTTPS
@@ -202,93 +213,80 @@ If you encounter issues:
 2. Ensure you're using HTTPS in production
 3. Verify service worker registration
 4. Check PWA manifest validity
-5. **For SMS issues**: Ensure PWA is installed on mobile device
+5. **For Gmail API issues**: Verify OAuth credentials and API enablement
+6. **For authentication issues**: Check Google Cloud Console settings
 
 ## 🔮 Future Enhancements
 
-- [ ] Enhanced SMS API integration
-- [ ] Message templates
+- [ ] Enhanced Gmail API integration
+- [ ] Email templates
 - [ ] Contact management
-- [ ] Message history
+- [ ] Email history
 - [ ] Delivery confirmations
-- [ ] Scheduled messages
+- [ ] Scheduled emails
 - [ ] Multi-language support expansion
-- [ ] CSV/Excel import for phone numbers
-- [ ] Message personalization per recipient
+- [ ] CSV/Excel import for recipients
+- [ ] Email personalization per recipient
 - [ ] Rate limiting controls
 - [ ] Delivery reports
-- [ ] SMS delivery status tracking
+- [ ] Email delivery status tracking
+- [ ] Draft saving
+- [ ] Rich text editor
+- [ ] File attachments
 
 ## 📱 Usage Guide
 
-### **실제 SMS 전송 (Real SMS Sending)**
+### **Sending Emails with Gmail API**
 
-#### **모바일 PWA 설치 후:**
-1. **PWA 설치**: 브라우저에서 "홈 화면에 추가" 선택
-2. **홈 화면에서 실행**: 네이티브 앱처럼 작동
-3. **전화번호 입력**: 한 줄에 하나씩 번호 입력
-4. **메시지 작성**: SMS 메시지 입력 (최대 500자)
-5. **SMS 전송**: 버튼 클릭 시 자동으로 SMS 앱 열림
-6. **전송 완료**: 사용자가 SMS 앱에서 전송 버튼만 누르면 됨
+#### **First Time Setup:**
+1. **Google Authentication**: Click "Sign in with Google"
+2. **Grant Permissions**: Allow Gmail API access
+3. **Verify Account**: Confirm your email address
 
-#### **데스크톱에서:**
-1. **시뮬레이션 모드**: 실제 SMS 전송을 시뮬레이션
-2. **SMS API 연동**: Twilio 등 SMS 서비스와 연동하여 실제 전송
+#### **Sending Emails:**
+1. **Enter Recipients**: Type email addresses (one per line)
+2. **Write Subject**: Enter email subject (max 100 characters)
+3. **Compose Message**: Write your email (max 10,000 characters)
+4. **Choose Mode**: Bulk or individual sending
+5. **Send**: Click send button and monitor progress
 
-### Sending to Multiple Numbers
+### Email Formatting
 
-1. **Enter Phone Numbers**: 
-   - Type or paste phone numbers, one per line
-   - Example:
-     ```
-     010-1234-5678
-     010-8765-4321
-     010-5555-1234
-     ```
-
-2. **Choose Send Mode**:
-   - **Bulk Mode**: Same message to all numbers (faster)
-   - **Individual Mode**: Individual messages to each number
-
-3. **Write Message**: 
-   - Enter your SMS message (max 500 characters)
-   - Character counter shows remaining space
-
-4. **Send**: 
-   - Click the send button
-   - **Mobile**: SMS app opens automatically
-   - **Desktop**: Simulation mode or API integration
-
-### Phone Number Formatting
-
-The app automatically formats phone numbers as you type:
-- **Input**: 01012345678
-- **Formatted**: 010-1234-5678
-- **Validated**: Only Korean mobile numbers accepted
+The app automatically formats emails for Gmail:
+- **Headers**: Proper To, Subject, MIME headers
+- **Encoding**: Base64 encoding for Gmail API
+- **Formatting**: Clean, readable email structure
 
 ### Progress Tracking
 
-During bulk sending, you'll see:
+During email sending, you'll see:
 - Real-time progress updates
 - Success/failure counts
-- Individual number status
+- Individual recipient status
 - Completion summary
 
 ## 🔧 Technical Implementation
 
-### **Real SMS on Mobile**
-- **SMS URL Scheme**: `sms:01012345678?body=message`
-- **Web Share API**: Modern browsers support
-- **Fallback**: Direct SMS URL navigation
-- **PWA Integration**: Seamless native app experience
+### **Gmail API Integration**
+- **OAuth 2.0 Flow**: Secure authentication
+- **Gmail API v1**: Official Google REST API
+- **Base64 Encoding**: RFC 2822 compliant emails
+- **Rate Limiting**: Built-in delays (1 second between sends)
 
-### **Desktop Fallback**
-- **Simulation Mode**: Demo functionality
-- **API Integration**: SMS service providers
-- **Error Handling**: Graceful degradation
+### **PWA Features**
+- **Service Worker**: Offline caching and sync
+- **Manifest**: App-like installation
+- **Responsive Design**: Mobile-first approach
+- **Modern APIs**: ES6+, async/await, fetch
+
+### **Security Features**
+- **OAuth 2.0**: Google's secure authentication
+- **Scoped Access**: Minimal permissions required
+- **HTTPS Only**: Secure communication
+- **No Data Storage**: Emails not stored locally
 
 ---
 
-**🎉 핵심 기능: 모바일 PWA 설치 후 실제 SMS 전송이 가능합니다!**
+**🎉 Key Feature: Real email sending using Gmail API with secure OAuth authentication!**
 
-**🎉 Key Feature: Real SMS sending is possible after installing PWA on mobile!**
+**🎉 핵심 기능: Gmail API를 사용한 실제 이메일 전송과 안전한 OAuth 인증!**

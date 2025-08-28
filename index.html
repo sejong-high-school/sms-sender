@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMS Korea - 실제 SMS 전송</title>
-    <meta name="description" content="Send real SMS messages to South Korean phone numbers">
-    <meta name="theme-color" content="#4F46E5">
+    <title>Gmail Sender - Email PWA</title>
+    <meta name="description" content="Send emails using Google Gmail API">
+    <meta name="theme-color" content="#EA4335">
     <link rel="manifest" href="manifest.json">
     <link rel="icon" type="image/png" href="icons/icon-192x192.png">
     <link rel="apple-touch-icon" href="icons/icon-192x192.png">
@@ -14,107 +14,130 @@
 <body>
     <div class="container">
         <header class="header">
-            <h1 class="title">SMS Korea</h1>
-            <p class="subtitle">한국 전화번호로 실제 SMS 전송</p>
+            <div class="header-content">
+                <div class="logo">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="#EA4335">
+                        <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819L12 13.636 5.455 20.002H1.636A1.636 1.636 0 0 1 0 18.366V5.457c0-.904.732-1.636 1.636-1.636h20.728c.904 0 1.636.732 1.636 1.636z"/>
+                    </svg>
+                </div>
+                <h1 class="title">Gmail Sender</h1>
+                <p class="subtitle">Send emails using Gmail API</p>
+            </div>
         </header>
 
         <main class="main">
-            <div class="form-container">
-                <div class="input-group">
-                    <label for="phoneNumbers" class="label">전화번호 (Phone Numbers)</label>
-                    <div class="phone-input-container">
+            <!-- Authentication Section -->
+            <div id="authSection" class="auth-section">
+                <div class="auth-content">
+                    <h2>🔐 Gmail Authentication Required</h2>
+                    <p>To send emails, you need to authenticate with your Google account.</p>
+                    <button id="authButton" class="auth-button">
+                        <span class="button-icon">🔑</span>
+                        <span class="button-text">Sign in with Google</span>
+                    </button>
+                    <div class="auth-info">
+                        <small>This app will only access your Gmail account to send emails. No emails will be read.</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Form Section -->
+            <div id="emailSection" class="email-section" style="display: none;">
+                <div class="form-container">
+                    <div class="form-header">
+                        <h2>✉️ Compose Email</h2>
+                        <div class="user-info">
+                            <span id="userEmail" class="user-email"></span>
+                            <button id="signOutButton" class="sign-out-button">Sign Out</button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="toEmails" class="label">To (Recipients)</label>
                         <textarea 
-                            id="phoneNumbers" 
-                            class="textarea phone-numbers" 
-                            placeholder="한 번에 여러 번호 입력 가능&#10;예시:&#10;010-1234-5678&#10;010-8765-4321&#10;010-5555-1234"
-                            rows="4"
+                            id="toEmails" 
+                            class="textarea email-input" 
+                            placeholder="Enter email addresses, one per line&#10;Example:&#10;john@example.com&#10;jane@company.com"
+                            rows="3"
                             required
                         ></textarea>
-                        <div class="phone-help">
-                            <small class="help-text">한 줄에 하나씩 번호 입력 (Enter one number per line)</small>
-                            <div class="phone-count">
-                                <span id="phoneCount">0</span> 개의 번호
+                        <div class="email-help">
+                            <small class="help-text">Enter one email address per line</small>
+                            <div class="email-count">
+                                <span id="emailCount">0</span> recipients
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="input-group">
-                    <label for="message" class="label">메시지 (Message)</label>
-                    <textarea 
-                        id="message" 
-                        class="textarea" 
-                        placeholder="전송할 SMS 메시지를 입력하세요..."
-                        rows="4"
-                        maxlength="500"
-                        required
-                    ></textarea>
-                    <div class="char-count">
-                        <span id="charCount">0</span>/500
+                    <div class="input-group">
+                        <label for="subject" class="label">Subject</label>
+                        <input 
+                            type="text" 
+                            id="subject" 
+                            class="input" 
+                            placeholder="Enter email subject"
+                            required
+                        >
                     </div>
-                </div>
 
-                <div class="send-options">
-                    <div class="option-group">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="bulkMode" checked>
-                            <span class="checkmark"></span>
-                            일괄 전송 모드 (Bulk Send Mode)
-                        </label>
-                        <small class="help-text">체크하면 모든 번호에 동일한 메시지 전송</small>
+                    <div class="input-group">
+                        <label for="message" class="label">Message</label>
+                        <textarea 
+                            id="message" 
+                            class="textarea" 
+                            placeholder="Write your email message here..."
+                            rows="6"
+                            required
+                        ></textarea>
+                        <div class="char-count">
+                            <span id="charCount">0</span> characters
+                        </div>
                     </div>
+
+                    <div class="send-options">
+                        <div class="option-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="bulkMode" checked>
+                                <span class="checkmark"></span>
+                                Bulk Send Mode
+                            </label>
+                            <small class="help-text">Send the same email to all recipients</small>
+                        </div>
+                    </div>
+
+                    <button id="sendButton" class="send-button">
+                        <span class="button-text">Send Email</span>
+                        <span class="button-icon">📧</span>
+                    </button>
+
+                    <div id="status" class="status"></div>
                 </div>
 
-                <button id="sendButton" class="send-button">
-                    <span class="button-text">SMS 전송</span>
-                    <span class="button-icon">📱</span>
-                </button>
-
-                <div id="status" class="status"></div>
-            </div>
-
-            <div class="info-section">
-                <h3>📱 실제 SMS 전송 방법 (Real SMS Sending)</h3>
-                
-                <div class="sms-info">
-                    <h4>✅ 모바일에서 실제 SMS 전송 (Real SMS on Mobile)</h4>
-                    <ul>
-                        <li><strong>단일 번호</strong>: 자동으로 기본 SMS 앱이 열립니다</li>
-                        <li><strong>여러 번호</strong>: 전화번호와 메시지가 복사되어 편리하게 전송할 수 있습니다</li>
-                        <li><strong>삼성 메시지, 카카오톡 등</strong>: 기본 SMS 앱과 동일하게 작동합니다</li>
-                    </ul>
-                </div>
-
-                <div class="sms-info">
-                    <h4>💻 데스크톱에서 사용 (Desktop Usage)</h4>
-                    <ul>
-                        <li><strong>시뮬레이션 모드</strong>: 실제 SMS 전송을 시뮬레이션합니다</li>
-                        <li><strong>SMS API 연동</strong>: Twilio, Nexmo 등 SMS 서비스와 연동 가능합니다</li>
-                    </ul>
-                </div>
-
-                <h3>사용 방법 (How to use)</h3>
-                <ol>
-                    <li>한국 전화번호를 입력하세요 (한 줄에 하나씩) (Enter South Korean phone numbers, one per line)</li>
-                    <li>전송할 SMS 메시지를 작성하세요 (Write your SMS message)</li>
-                    <li>일괄 전송 모드를 선택하세요 (Choose bulk send mode)</li>
-                    <li>SMS 전송 버튼을 클릭하세요 (Click the SMS send button)</li>
-                    <li>모바일에서는 자동으로 SMS 앱이 열립니다 (On mobile, SMS app opens automatically)</li>
-                </ol>
-                
-                <div class="note">
-                    <strong>📱 모바일 PWA 설치 후:</strong> 홈 화면에 설치하면 네이티브 앱처럼 실제 SMS를 보낼 수 있습니다!
-                    <br><br>
-                    <strong>📱 Mobile PWA after installation:</strong> After installing to home screen, you can send real SMS like a native app!
+                <div class="info-section">
+                    <h3>📧 How to Use</h3>
+                    <ol>
+                        <li>Sign in with your Google account</li>
+                        <li>Enter recipient email addresses (one per line)</li>
+                        <li>Write your subject and message</li>
+                        <li>Choose bulk or individual send mode</li>
+                        <li>Click send and monitor progress</li>
+                    </ol>
+                    
+                    <div class="note">
+                        <strong>Note:</strong> This app uses Gmail API to send emails. Make sure you have Gmail enabled in your Google account.
+                    </div>
                 </div>
             </div>
         </main>
 
         <footer class="footer">
-            <p>&copy; 2024 SMS Korea PWA - 실제 SMS 전송 가능</p>
+            <p>&copy; 2024 Gmail Sender PWA</p>
         </footer>
     </div>
 
+    <!-- Google API Scripts -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://accounts.google.com/gsi/client"></script>
     <script src="app.js"></script>
     <script>
         // Register service worker

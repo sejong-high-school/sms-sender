@@ -1,7 +1,7 @@
 {
-  "name": "sms-korea-pwa",
+  "name": "gmail-sender-pwa",
   "version": "1.0.0",
-  "description": "A Progressive Web App for sending SMS messages to South Korean phone numbers",
+  "description": "A Progressive Web App for sending emails using Google Gmail API",
   "main": "index.html",
   "scripts": {
     "start": "npx serve .",
@@ -11,13 +11,14 @@
   },
   "keywords": [
     "pwa",
-    "sms",
-    "korea",
+    "gmail",
+    "email",
+    "google-api",
     "progressive-web-app",
-    "mobile",
-    "communication"
+    "communication",
+    "productivity"
   ],
-  "author": "SMS Korea PWA",
+  "author": "Gmail Sender PWA",
   "license": "MIT",
   "devDependencies": {
     "serve": "^14.2.0",
@@ -28,10 +29,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/sms-korea-pwa.git"
+    "url": "https://github.com/yourusername/gmail-sender-pwa.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/sms-korea-pwa/issues"
+    "url": "https://github.com/yourusername/gmail-sender-pwa/issues"
   },
-  "homepage": "https://github.com/yourusername/sms-korea-pwa#readme"
+  "homepage": "https://github.com/yourusername/gmail-sender-pwa#readme"
 }
